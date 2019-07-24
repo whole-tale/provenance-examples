@@ -1,8 +1,13 @@
 # Resource_selection_Carrizo
-Code to examine ResourceSelection R package
 
-To run this code on your local computer, first install the library dependancies by running
-`install.R`
+```
+reprozip trace sh run.sh
 
-To run the analysis, open a terminal and run
-`sh run.sh`
+reprozip pack carizzo-plains
+
+reprounzip graph --processes process --packages drop --otherfiles io --regex-filter ^/etc graphfile.dot carizzo-plains.rpz
+
+dot -Tsvg graphfile.dot -o graph.svg
+```
+
+<img src="./graph.svg">
