@@ -11,3 +11,5 @@ reprozip pack multistep
 reprounzip graph --processes process --packages drop --otherfiles io --regex-filter ^/etc graphfile.dot multistep.rpz
 dot -Tsvg graphfile.dot -o graph.svg
 ```
+
+<img src="./graph.svg">
