@@ -1,0 +1,65 @@
+---
+title: "Density Series"
+author: "Ecoblender"
+date: "July 24, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(lsmeans)
+```
+
+
+```{r cars}
+data <- read.csv("Data/phytometer_data_trials_2018.csv")
+str(data)
+summary(data)
+cols <- c("number.of.plants", "height.cm", "number.of.leaves", "final.mass.above")
+
+data[cols] <- lapply(data[cols], as.character)
+data[cols] <- lapply(data[cols], as.numeric)
+str(data)
+
+
+#look at final mass
+c3 <- filter(data, census == 3) %>% mutate(weight.per.plant = final.mass.above/number.of.plants)
+
+#want only one value per rep
+c3 <- select(c3, -within.rep, -height.cm, -number.of.leaves, -final.mass.above, -rep, -number.of.plants, -final.mass.below) %>% distinct()
+
+#get rid of NA
+c3 <- na.omit(c3)
+c3 <- filter(c3, weight.per.plant != Inf)
+ggplot(c3, aes(treatment, weight.per.plant, fill = species)) + geom_boxplot() + facet_grid(~density) 
+
+ggplot(c3, aes(density, weight.per.plant, fill = species)) + geom_smooth() + facet_grid(~treatment)
+
+
+#ggplot(c3, aes(density, weight.per.plant)) + geom_point()
+#not normally distributed, right skewed
+#ggplot(c3, aes(weight.per.plant))+ geom_density()
+#m1 <- lm(weight.per.plant ~ treatment * density, data = c3)
+#summary(m1)
+#shapiro.test(resid(m1))
+#residuals not normal
+
+
+
+
+
+
+#calculate means for each pot
+pot.ag <- data %>% group_by(pot.label, census, species, treatment, density) %>% summarise(.mean.n.plants = mean(number.of.plants), mean.leaves = mean(number.of.leaves), mean.height = mean(height.cm))
+
+#filter out obvious typo?
+
+ggplot(pot.ag, aes(treatment, mean.height, fill = species)) + geom_boxplot() + facet_grid(~density)
+ggplot(pot.ag, aes(treatment, mean.leaves, fill = species)) + geom_boxplot() + facet_grid(~density)
+```
+
+
+
+
+
