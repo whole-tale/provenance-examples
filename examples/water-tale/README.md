@@ -10,3 +10,5 @@ reprozip pack watertale
 reprounzip graph --processes process --packages drop --otherfiles io --regex-filter ^/etc graphfile.dot watertale.rpzk
 
 ```
+
+<img src="./graph.svg">
