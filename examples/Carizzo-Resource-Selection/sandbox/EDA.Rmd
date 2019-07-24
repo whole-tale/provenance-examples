@@ -1,0 +1,65 @@
+---
+title: "EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ResourceSelection)
+```
+
+## Model EDA  
+```{r, rsf all data, warning=FALSE, message=FALSE, include=TRUE}
+#data####
+#not fully paired, the 0 rows were randomly chosen (using sample) but they are somewhat paired in that they have a lizard ID assigned to them. So if lizard A has 20 relocations then there are 20 lizard A available rows (pres = 0) and so on. 
+#uniID is the identifier for the pixel/grid cell the covariates came from. 
+#no replace is no overlapping between used and unused
+#with replace can overlap between used and unused
+#no replace data = no overlapping
+data <- read_csv("../data/data_no_replace.csv")
+data$year <- as.character(data$year)
+data
+#global availability (m=0) and bootstrap (B=99)
+m1 <- rspf(status ~ Shrub_Cov + NDVI + Slope + Elev + Aspect + Solar, data, m=0, B = 99)
+summary(m1)
+## Visualize the relationships
+plot(m1)
+mep(m1) # marginal effects similar to plot but with CIs
+kdepairs(m1) # 2D kernel density estimates
+m2 <- rspf(status ~ Shrub_Cov + NDVI + Slope + Elev, data, m=0, B = 99)
+summary(m2)
+## Visualize the relationships
+plot(m2)
+mep(m2) # marginal effects similar to plot but with CIs
+kdepairs(m2) # 2D kernel density estimates
+## Compare models
+CAIC(m1, m2)
+## fit and compare to null RSF model (not available for RSPF)
+m3 <- rsf(status ~ Shrub_Cov + NDVI + Slope + Elev, data, m=0, B = 0)
+CAIC(m1, m3)
+#data with replace means can overlap (same assumption as work in Carrizo)
+data <- read_csv("../data/data_with_replace.csv")
+data$year <- as.character(data$year)
+data
+#global availability (m=0) and bootstrap (B=99)
+m4 <- rspf(status ~ Shrub_Cov + NDVI + Slope + Elev + Aspect + Solar, data, m=0, B = 99)
+summary(m1)
+## Visualize the relationships
+plot(m4)
+mep(m4) # marginal effects similar to plot but with CIs
+kdepairs(m4) # 2D kernel density estimates
+m5 <- rspf(status ~ Shrub_Cov + NDVI + Slope + Elev, data, m=0, B = 99)
+summary(m2)
+## Visualize the relationships
+plot(m5)
+mep(m5) # marginal effects similar to plot but with CIs
+kdepairs(m5) # 2D kernel density estimates
+## Compare models
+CAIC(m4, m5)
+## fit and compare to null RSF model (not available for RSPF)
+m6 <- rsf(status ~ Shrub_Cov + NDVI + Slope + Elev, data, m=0, B = 0)
+CAIC(m4, m6)
+#contrast non overlapping and overlapping
+CAIC(m1, m4)
+```
