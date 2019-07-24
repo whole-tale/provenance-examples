@@ -7,3 +7,5 @@ reprozip pack ajps
 reprounzip graph --processes process --packages drop --otherfiles io --regex-filter ^/etc graphfile.dot ajps.rpz
 dot -Tsvg graphfile.dot -o graph.svg
 ```
+
+<img src="./graph.svg">
