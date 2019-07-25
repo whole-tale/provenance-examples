@@ -1,8 +1,0 @@
-install.packages("dplyr")
-install.packages("sf")
-install.packages("tidyverse")
-install.packages("ResourceSelection")
-install.packages('maps')
-install.packages('USAboundaries')
-install.packages('ggspatial')
-install.packages('broom')

@@ -1,0 +1,151 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(afex)
+
+# return a vector with a specified correlation to a pre-existing vector
+rnormpre <- function (x, rho=0, ymean=0, ysd=1) {
+  n <- length(x)
+  y <- stats::rnorm(n)
+  z <- rho * scale(x)[,1] + sqrt(1 - rho^2) * 
+    scale(stats::resid(stats::lm(y ~ x)))[,1]
+  yresult <- ymean + ysd * z
+  yresult
+}
+```
+
+## Set study parameters
+
+The means and variance in the intercepts and slopes can be estimated from pilot data.
+
+```{r}
+# number of subjects and items
+sub_n <- 100
+item_n <- 50
+
+grand_int <- 2.5 # overall mean (intercept)
+grand_sd <- 1.2 # overall SD
+
+sub_sd <- 0.1 # SD of subject intercepts
+
+item_dist <- c(.1,.2,.4,.2,.1) # distribution of item ratings
+
+cor_mean <- .2 # mean correlation between ratings and traits
+cor_sd <- .1 # sd of subjects' correlations between ratings and traits
+```
+
+## Simulate data
+
+Make random intercepts (trait rating) for each item.
+
+```{r}
+
+item <- tibble(
+  item_id = paste0("I",1:item_n),
+  item_i = sample(1:length(item_dist), item_n, replace = T, prob = item_dist)
+)
+
+ggplot(item) + 
+  geom_histogram(
+    aes(item_i), 
+    binwidth = 1, 
+    fill="white", 
+    color="red"
+  )
+```
+
+Make random intercepts (mean rating) and slopes (correlation between traits and ratings) for each subject.
+
+```{r}
+
+sub <- tibble(
+  sub_id = paste0("S", 1:sub_n),
+  sub_i = rnorm(sub_n, 0, sub_sd),
+  sub_r = rnorm(sub_n, cor_mean, cor_sd) %>% pmax(-1, .) %>% pmin(1, .)
+)
+
+ggplot(sub) + 
+  geom_histogram(
+    aes(sub_r), 
+    binwidth = 0.05, 
+    fill="white", 
+    color="blue"
+  )
+
+ggplot(sub) + 
+  geom_histogram(
+    aes(sub_i), 
+    binwidth = 0.2, 
+    fill="white", 
+    color="red"
+  )
+```
+
+
+## Simulate Data
+
+```{r}
+for (i in 1:sub_n) {
+  r <- sub[[i,3]]
+  sub_i <- sub[[i,2]]
+  id <- sub[[i,1]]
+  ratings <- rnormpre(item$item_i, r, grand_int + sub_i, grand_sd) %>% 
+    round() %>%
+    pmax(1, .) %>% # set the minimum value to 1
+    pmin(5, .) # set the maximum value to 5
+  
+  item[id] = ratings
+}
+```
+
+
+## tidy data
+```{r}
+dat <- item %>%
+  gather(sub_id, rating, 3:ncol(.)) %>%
+  rename(trait = item_i)
+```
+
+
+## Visualise by-subject and overall trait-rating correlations
+```{r, fig.width = 8, fig.height = 6}
+dat %>%
+  group_by(sub_id) %>%
+  mutate(r = cor(trait, rating)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_smooth(aes(trait, rating, color = r, group = sub_id), 
+              method = "lm", se = FALSE) +
+  geom_smooth(aes(trait, rating), method = "lm", color = "black", size = 3) +
+  scale_color_viridis_c(alpha = 0.5)
+```
+
+
+
+## LMER
+```{r}
+m <- lmer(rating ~ trait + 
+            (1 | item_id) + 
+            (1 + trait | sub_id), 
+          data = dat)
+
+summary(m)
+```
+
+
+Confirm that random slopes for trait by subject are actually correlated with the sub_r the data were modelled from.
+
+```{r}
+rand_slope <- ranef(m)$sub_id %>%
+  as.tibble(rownames = "sub_id") %>%
+  left_join(sub, by = "sub_id")
+
+cor(rand_slope$sub_r, rand_slope$trait)
+```
+
+
+
