@@ -1,24 +1,23 @@
 ### A test for density dependence in monocultures   of native California annual seeds.
 
-#### Instructions
+### Structure
 
-Navigate to the `Density-Dependence-in-Annual-Plant-Species-in-the-San-Joaquin-Desert` folder and run the following commands
+`experiment/`: Holds the R scripts, data, and driver
 
-```
-reprozip trace sh run.sh
+`with-driver`: Holds output from a reprozip run that used the `run.sh` driver
 
-reprozip pack Density-Dependence
+`without-driver`: Holds output from a reprozip run that didn't use the `run.sh` driver
 
-reprounzip graph --processes process --packages drop --otherfiles io --regex-filter ^/etc graphfile.dot Density-Dependence.rpz
+### What the experiment does
 
-dot -Tsvg graphfile.dot -o graph.svg
-```
+The experiment runs the single `Rmd`, which reads `data/phytometer_data_trials_2018.csv`. It uses `phacelia.jpg` when rendering `results/index.html`.
 
+### Graphs
 
-#### Execution Flow
-`run.sh` runs `jb-code.Rmd` which uses `phytometer_data_trials_2018.csv` to produce `index.html`.
+With Driver:
 
+<img src="with-driver/graph.svg">
 
-#### Graphs
+Without Driver:
 
-<img src="./graph.svg">
+<img src="without-driver/graph.svg">

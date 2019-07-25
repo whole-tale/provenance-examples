@@ -1,5 +1,5 @@
-### No Run
-This is an example where `install.R` was run outside of reprozip. 
+### No Run.sh
+This is an example where `install.R` was run outside of reprozip, and `run.sh` was not used.
 
 
 #### Instructions
