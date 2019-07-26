@@ -12,6 +12,15 @@
 
 The experiment runs the single `Rmd`, which reads `data/phytometer_data_trials_2018.csv`. It uses `phacelia.jpg` when rendering `results/index.html`.
 
+## Running with Sciunit
+
+```
+sciunit open Density-Dependence-in-Annual-Plant-Species-in-the-San-Joaquin-Desert.zip
+
+sciunit repeat e1
+
+```
+
 ### Graphs
 
 With Driver:
