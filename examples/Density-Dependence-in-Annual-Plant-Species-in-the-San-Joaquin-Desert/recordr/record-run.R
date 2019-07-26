@@ -1,0 +1,5 @@
+library(recordr)
+rc <- new("Recordr")
+record(rc, "run.R", tag="Density Experiment")
+listRuns(rc)
+viewRuns(rc)
